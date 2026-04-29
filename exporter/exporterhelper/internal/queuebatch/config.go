@@ -118,6 +118,9 @@ type PartitionConfig struct {
 	//
 	// Entries are case-insensitive. Duplicated entries will trigger a validation error.
 	MetadataKeys []string `mapstructure:"metadata_keys"`
+
+	// Hard limit for the number of active partitions
+	CardinalityLimit int `mapstructure:"cardinality_limit"`
 }
 
 func (cfg *BatchConfig) Validate() error {
@@ -162,6 +165,10 @@ func (cfg *PartitionConfig) Validate() error {
 			return fmt.Errorf("duplicate entry in metadata_keys: %q (case-insensitive)", l)
 		}
 		uniq[l] = true
+	}
+
+	if cfg.CardinalityLimit < 0 {
+		return fmt.Errorf("`cardinality_limit` must be positive, found %d", cfg.CardinalityLimit)
 	}
 
 	return nil
